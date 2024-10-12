@@ -58,10 +58,9 @@
         res.json().then((data) => {
             var userTracking = new Tracking(data)
             var map = new DrawMap('container', userTracking.getStartPoint())
-            console.log(userTracking.getPath())
-            map.drawLine(userTracking.getPath())
-            userTracking.getPath().forEach((p) => {
-                map.drawMarker(p)
+            map.drawPath(userTracking.getPath())
+            userTracking.getStartStayPoints().forEach((p, i) => {
+                map.drawMarker(p, '停留' + Number(p.stayTime).toFixed(1) + '分钟' + ' No:' + i + ' Index:' + p.index + '距离起始点:' + p.s + 'm' + '被计算为停留点耗时:' + Number(p.h).toFixed(1) + '分钟')
             })
         })
     )
