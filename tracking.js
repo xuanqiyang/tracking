@@ -76,7 +76,6 @@ class Tracking {
   drawPath() {
     return this.points;
   }
-  
   getStartStayPoints() {
     return this.points.filter((v) => v.stayTime);
   }

@@ -1,0 +1,3 @@
+function randomPoints(bound, num){
+       
+}
