@@ -51,16 +51,18 @@
         return distance;
     }
 </script>
-<script src="./tracking.js"></script>
+<script src="./culcTracking.js"></script>
 <script src="./draw.js"></script>
 <script>
     fetch("http://localhost/tracking_data.json", {}).then(res =>
         res.json().then((data) => {
             var userTracking = new Tracking(data)
+            console.log(userTracking.getPath())
             var map = new DrawMap('container', userTracking.getStartPoint())
             map.drawPath(userTracking.getPath())
+            console.log(userTracking.getStartStayPoints())
             userTracking.getStartStayPoints().forEach((p, i) => {
-                map.drawMarker(p, '停留' + Number(p.stayTime).toFixed(1) + '分钟' + ' No:' + i + ' Index:' + p.index + '距离起始点:' + p.s + 'm' + '被计算为停留点耗时:' + Number(p.h).toFixed(1) + '分钟')
+                map.drawMarker(p, 'Index: ' + p.index + ' 停留' + Number(p.stayTime).toFixed(1) + '分钟')
             })
         })
     )

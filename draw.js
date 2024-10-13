@@ -10,7 +10,7 @@ class DrawMap {
     this.map.enableScrollWheelZoom(true);
   }
 
-  drawLine(points, color) {
+  drawLine (points, color) {
     color = color ? color : "blue";
     var node = new BMapGL.Icon(
       "//mapopen-pub-jsapigl.bj.bcebos.com/demoimg/zhongheyiyuan.png",
@@ -37,31 +37,30 @@ class DrawMap {
     );
     this.map.addOverlay(polyline);
   }
-  drawPath(points) {
+  drawPath (points) {
     this.drawLine(points);
     points.forEach((p, i) => {
       if (p.reconnect) {
         this.drawLine([points[i - 1], p], "red");
         this.drawMarker(
           p,
-          `离线时间:${
-            (new Date(p.time) - new Date(points[i - 1].time)) /
-            (60 * 1000).toFixed(1)
+          `离线时间:${p.dh
           }分钟;离线距离:${Math.round(p.ds)}米`,
-          'red'
+          'red',
+          [-20, -50]
         );
       }
     });
   }
 
-  drawMarker(p, text, color) {
+  drawMarker (p, text, color, offset = [-20, -30]) {
     var marker = new BMapGL.Marker(new BMapGL.Point(p.longitude, p.latitude), {
       title: p.time,
     });
     // 创建文本标注
     var label = new BMapGL.Label(text, {
       position: new BMapGL.Point(p.longitude, p.latitude),
-      offset: new BMapGL.Size(-20, -30),
+      offset: new BMapGL.Size(...offset),
     });
     label.setStyle({
       // 设置label的样式

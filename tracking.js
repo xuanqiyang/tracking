@@ -1,3 +1,4 @@
+// O(2N)
 class Tracking {
   /**
    *  @description 轨迹点对象
@@ -73,9 +74,7 @@ class Tracking {
   getPath() {
     return this.points;
   }
-  drawPath() {
-    return this.points;
-  }
+
   getStartStayPoints() {
     return this.points.filter((v) => v.stayTime);
   }
