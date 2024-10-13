@@ -1,6 +1,9 @@
 // 接近 O(N^2)
 class Tracking {
-    constructor(points) {
+    constructor() {
+        this.points = []
+    }
+    initTracking (points) {
         this.points = points.sort((a, b) => new Date(a.time) - new Date(b.time));
         this.points.forEach((v, pointIndex) => {
             if (pointIndex > 0) {

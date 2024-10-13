@@ -8,6 +8,7 @@ class DrawMap {
     var point = new BMapGL.Point(centalPoint.longitude, centalPoint.latitude);
     this.map.centerAndZoom(point, 19);
     this.map.enableScrollWheelZoom(true);
+    this.marketSet = new Set()
   }
 
   drawLine (points, color) {
@@ -52,10 +53,18 @@ class DrawMap {
       }
     });
   }
-
-  drawMarker (p, text, color, offset = [-20, -30]) {
+  clear () {
+    this.map.clearOverlays()
+    this.marketSet.clear()
+  }
+  drawMarker (p, text, color, offset = [-20, -30], cache = true) {
+    if (cache && this.marketSet.has(p)) {
+      return
+    } else {
+      this.marketSet.add(p)
+    }
     var marker = new BMapGL.Marker(new BMapGL.Point(p.longitude, p.latitude), {
-      title: p.time,
+      title: p.time || '',
     });
     // 创建文本标注
     var label = new BMapGL.Label(text, {
