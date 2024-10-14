@@ -1,109 +1,74 @@
-const ZoomLevel = {
-  4: {
-    maxNum: 100,
-  },
-  5: {
-    maxNum: 200,
-  },
-  6: {
-    maxNum: 300,
-  },
-  7: {
-    maxNum: 400,
-  },
-  8: {
-    maxNum: 500,
-  },
-  9: {
-    maxNum: 600,
-  },
-  10: {
-    maxNum: 700,
-  },
-  11: {
-    maxNum: 800,
-  },
-  12: {
-    maxNum: 900,
-  },
-  13: {
-    maxNum: 1000,
-  },
-  14: {
-    maxNum: 2000,
-  },
-  15: {
-    maxNum: 3000,
-  },
-  16: {
-    maxNum: 4000,
-  },
-  17: {
-    maxNum: 5000,
-  },
-  18: {
-    maxNum: 6000,
-  },
-  19: {
-    maxNum: 7000,
-  },
-  20: {
-    maxNum: 8000,
-  },
-  21: {
-    maxNum: 10000,
-  },
-};
+
 class PointsCutter {
   static MaxZoom = 21;
   static MinZoom = 3;
+  static NumLimitInZoom = {
+    3: 10,
+    4: 100,
+    5: 200,
+    6: 300,
+    7: 400,
+    8: 500,
+    9: 600,
+    10: 700,
+    11: 800,
+    12: 900,
+    13: 1000,
+    14: 2000,
+    15: 3000,
+    16: 4000,
+    17: 5000,
+    18: 6000,
+    19: 7000,
+    20: 8000,
+    21: 10000,
+  };
   constructor() {
     this.cachePoints = new Set();
   }
-  filterByZoom (points, bound, zoom) {
+  getPoints (points, bound, zoom) {
     let cutPoints = [];
     // 筛选比zoom层级小的points
     const overZoomPoints = points.filter((v) => zoom <= v.zoomLevel);
     // 最大比例尺,直接返回按边界截取的所有points
     if (zoom === PointsCutter.MaxZoom) {
-      cutPoints = this.filterByBound(overZoomPoints, bound);
+      cutPoints = filterByBound(overZoomPoints, bound);
     } else {
-      cutPoints =
-        zoom === PointsCutter.MinZoom
-          ? overZoomPoints
-          : this.filterByBound(overZoomPoints, bound);
+      cutPoints = (zoom === PointsCutter.MinZoom ? overZoomPoints : filterByBound(overZoomPoints, bound));
     }
-    return getLimitPoints(cutPoints, ZoomLevel[zoom].maxNum);
+    return getLimitPoints(cutPoints, PointsCutter.NumLimitInZoom[zoom]);
   }
-  /*
-   * @description 根据经纬度范围过滤轨迹点
-   * @param {Array} points 轨迹点数组
+
+}
+
+/*
+   * @description 根据经纬度范围过滤坐标点
+   * @param {Array} points 坐标点数组
    * @param {Array} bound 经纬度范围[东北角, 西南角]
-   * @return {Array} 过滤后的轨迹点数组
-   */
-  filterByBound (points, bound) {
-    const sortedPoints = [...points].sort((a, b) => a.latitude - b.latitude);
-    let startLatIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
-    let endLatIndex = binarySearch(
-      sortedPoints,
-      bound[0].latitude,
-      "latitude",
-      true
-    );
-    const latFilteredPoints = sortedPoints
-      .slice(startLatIndex, endLatIndex + 1)
-      .sort((a, b) => a.longitude - b.longitude);
-    // 过国际日期变更线180|-180
-    const turnOverLongitude = bound[1].longitude > bound[0].longitude
-    if (turnOverLongitude) {
-      let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude")
-      let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true)
-      return latFilteredPoints.slice(startLngIndex).concat(latFilteredPoints.slice(0, endLngIndex + 1));
-    } else {
-      let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude");
-      let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true);
-      return latFilteredPoints.slice(startLngIndex, endLngIndex + 1);
-    }
+   * @return {Array} 过滤后的坐标点数组
+*/
+function filterByBound (points, bound) {
+  const sortedPoints = [...points].sort((a, b) => a.latitude - b.latitude);
+  let startLatIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
+  let endLatIndex = binarySearch(
+    sortedPoints,
+    bound[0].latitude,
+    "latitude",
+    true
+  );
+  const latFilteredPoints = sortedPoints
+    .slice(startLatIndex, endLatIndex + 1)
+    .sort((a, b) => a.longitude - b.longitude);
+  // 过国际日期变更线180|-180
+  const turnOverLongitude = bound[1].longitude > bound[0].longitude
+  if (turnOverLongitude) {
+    let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude")
+    let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true)
+    return latFilteredPoints.slice(startLngIndex).concat(latFilteredPoints.slice(0, endLngIndex + 1));
+  } else {
+    let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude");
+    let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true);
+    return latFilteredPoints.slice(startLngIndex, endLngIndex + 1);
   }
 }
 function add (arg1, arg2) {
@@ -141,29 +106,30 @@ function makeRange (arr) {
   }, 0);
   return newArr;
 }
-const ZoomLevelRatio = [
-  10 / 1000000,
-  20 / 1000000,
-  50 / 1000000,
-  100 / 1000000,
-  150 / 1000000,
-  200 / 1000000,
-  10000 / 1000000,
-  20000 / 1000000,
-  30000 / 1000000,
-  40000 / 1000000,
-  50000 / 1000000,
-  60000 / 1000000,
-  70000 / 1000000,
-  80000 / 1000000,
-  90000 / 1000000,
-  100000 / 1000000,
-  110000 / 1000000,
-  120000 / 1000000,
-  219470 / 1000000,
-];
+
 // 生成在边界bound中num数量的随机经纬度点
 function getRandomPoints (bound, num) {
+  const ZoomLevelRatio = [
+    10 / 1000000,
+    20 / 1000000,
+    50 / 1000000,
+    100 / 1000000,
+    150 / 1000000,
+    200 / 1000000,
+    10000 / 1000000,
+    20000 / 1000000,
+    30000 / 1000000,
+    40000 / 1000000,
+    50000 / 1000000,
+    60000 / 1000000,
+    70000 / 1000000,
+    80000 / 1000000,
+    90000 / 1000000,
+    100000 / 1000000,
+    110000 / 1000000,
+    120000 / 1000000,
+    219470 / 1000000,
+  ];
   let points = [];
   const range = makeRange(ZoomLevelRatio);
   for (let i = 0; i < num; i++) {
