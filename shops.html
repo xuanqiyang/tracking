@@ -56,11 +56,11 @@
         drawShops([{ latitude: bounds.ne.lat, longitude: bounds.ne.lng }, { latitude: bounds.sw.lat, longitude: bounds.sw.lng }], zoomLevel)
     })
     function drawShops (cutBound, zoom) {
-        console.log(cutBound,zoom)
+        console.log(cutBound, zoom)
         map.clear()
         const cutPoints = pointsCutter.filterByZoom(shopPoints, cutBound, zoom)
         cutPoints.forEach((p, i) => {
-            map.drawMarker({ point: p, turnOverLongitude: cutBound[0].longitude >= -180 && cutBound[0].longitude < 0 })
+            map.drawMarker({ point: p, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
         })
     }
 

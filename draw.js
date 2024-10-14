@@ -11,7 +11,7 @@ class DrawMap {
     this.marketSet = new Set();
   }
 
-  drawLine(points, color) {
+  drawLine (points, color) {
     color = color ? color : "blue";
     var node = new BMapGL.Icon(
       "//mapopen-pub-jsapigl.bj.bcebos.com/demoimg/zhongheyiyuan.png",
@@ -38,7 +38,7 @@ class DrawMap {
     );
     this.map.addOverlay(polyline);
   }
-  drawPath(points) {
+  drawPath (points) {
     this.drawLine(points);
     points.forEach((p, i) => {
       if (p.reconnect) {
@@ -52,17 +52,16 @@ class DrawMap {
       }
     });
   }
-  clear() {
+  clear () {
     this.map.clearOverlays();
     this.marketSet.clear();
   }
-  drawMarker({
+  drawMarker ({
     point,
     text,
     color,
     offset = [-20, -30],
     cache = true,
-    turnOverLongitude = false,
   }) {
     if (cache && this.marketSet.has(point)) {
       return;
@@ -70,7 +69,7 @@ class DrawMap {
       this.marketSet.add(point);
     }
     var marker = new BMapGL.Marker(
-      new BMapGL.Point(point.longitude - 360, point.latitude),
+      new BMapGL.Point(point.longitude, point.latitude),
       {
         title: point.time || "",
       }
@@ -79,7 +78,7 @@ class DrawMap {
       // 创建文本标注
       var label = new BMapGL.Label(text, {
         position: new BMapGL.Point(
-          turnOverLongitude ? point.longitude - 360 : point.longitude,
+          point.longitude,
           point.latitude
         ),
         offset: new BMapGL.Size(...offset),

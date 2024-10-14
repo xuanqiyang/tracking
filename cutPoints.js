@@ -60,7 +60,7 @@ class PointsCutter {
   constructor() {
     this.cachePoints = new Set();
   }
-  filterByZoom(points, bound, zoom) {
+  filterByZoom (points, bound, zoom) {
     let cutPoints = [];
     // 筛选比zoom层级小的points
     const overZoomPoints = points.filter((v) => zoom <= v.zoomLevel);
@@ -81,37 +81,32 @@ class PointsCutter {
    * @param {Array} bound 经纬度范围[东北角, 西南角]
    * @return {Array} 过滤后的轨迹点数组
    */
-  filterByBound(points, bound) {
+  filterByBound (points, bound) {
     const sortedPoints = [...points].sort((a, b) => a.latitude - b.latitude);
-    let startIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
-    let endIndex = binarySearch(
+    let startLatIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
+    let endLatIndex = binarySearch(
       sortedPoints,
       bound[0].latitude,
       "latitude",
       true
     );
     const latFilteredPoints = sortedPoints
-      .slice(startIndex, endIndex + 1)
+      .slice(startLatIndex, endLatIndex + 1)
       .sort((a, b) => a.longitude - b.longitude);
-    // 过国际日期变更线,百度地图坐标系会翻转
-
-    const turnOverLongitude =
-      bound[0].longitude >= -180 && bound[0].longitude < 0;
-    const maxLongitude = Math.max(
-      turnOverLongitude ? 360 + bound[0].longitude : bound[0].longitude,
-      turnOverLongitude ? bound[1].longitude : bound[1].longitude
-    );
-    const minLongitude = Math.min(
-      turnOverLongitude ? 360 + bound[0].longitude : bound[0].longitude,
-      turnOverLongitude ? bound[1].longitude : bound[1].longitude
-    );
-    startIndex = binarySearch(latFilteredPoints, minLongitude, "longitude");
-    endIndex = binarySearch(latFilteredPoints, maxLongitude, "longitude", true);
-    console.log(bound, minLongitude, maxLongitude);
-    return latFilteredPoints.slice(startIndex, endIndex + 1);
+    // 过国际日期变更线180|-180
+    const turnOverLongitude = bound[1].longitude > bound[0].longitude
+    if (turnOverLongitude) {
+      let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude")
+      let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true)
+      return latFilteredPoints.slice(startLngIndex).concat(latFilteredPoints.slice(0, endLngIndex + 1));
+    } else {
+      let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude");
+      let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true);
+      return latFilteredPoints.slice(startLngIndex, endLngIndex + 1);
+    }
   }
 }
-function add(arg1, arg2) {
+function add (arg1, arg2) {
   if (
     arg1 === null ||
     arg2 === null ||
@@ -135,7 +130,7 @@ function add(arg1, arg2) {
   const n = r1 >= r2 ? r1 : r2;
   return Number(((arg1 * m + arg2 * m) / m).toFixed(n));
 }
-function makeRange(arr) {
+function makeRange (arr) {
   const newArr = [];
   arr.reduce((s, v, i) => {
     newArr[i] = [];
@@ -168,7 +163,7 @@ const ZoomLevelRatio = [
   219470 / 1000000,
 ];
 // 生成在边界bound中num数量的随机经纬度点
-function getRandomPoints(bound, num) {
+function getRandomPoints (bound, num) {
   let points = [];
   const range = makeRange(ZoomLevelRatio);
   for (let i = 0; i < num; i++) {
@@ -191,7 +186,7 @@ function getRandomPoints(bound, num) {
   }
   return points;
 }
-function getLimitPoints(points, n) {
+function getLimitPoints (points, n) {
   if (n <= 0) {
     return [];
   }
@@ -211,7 +206,7 @@ function getLimitPoints(points, n) {
   }
   return selectedPoints;
 }
-function binarySearch(arr, target, key, isRight) {
+function binarySearch (arr, target, key, isRight) {
   let left = 0;
   let right = arr.length - 1;
   let index = -1;
