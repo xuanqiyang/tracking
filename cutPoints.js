@@ -94,27 +94,53 @@ class PointsCutter {
       .slice(startIndex, endIndex + 1)
       .sort((a, b) => a.longitude - b.longitude);
     // 过国际日期变更线,百度地图坐标系会翻转
+
     const turnOverLongitude =
-      bound[0].longitude > 180 || bound[0].longitude < 0;
+      bound[0].longitude >= -180 && bound[0].longitude < 0;
     const maxLongitude = Math.max(
-      turnOverLongitude ? 360 - bound[0].longitude : bound[0].longitude,
-      turnOverLongitude ? 360 - bound[0].longitude : bound[1].longitude
+      turnOverLongitude ? 360 + bound[0].longitude : bound[0].longitude,
+      turnOverLongitude ? bound[1].longitude : bound[1].longitude
     );
     const minLongitude = Math.min(
-      turnOverLongitude ? 360 - bound[0].longitude : bound[0].longitude,
-      turnOverLongitude ? 360 - bound[1].longitude : bound[1].longitude
+      turnOverLongitude ? 360 + bound[0].longitude : bound[0].longitude,
+      turnOverLongitude ? bound[1].longitude : bound[1].longitude
     );
     startIndex = binarySearch(latFilteredPoints, minLongitude, "longitude");
     endIndex = binarySearch(latFilteredPoints, maxLongitude, "longitude", true);
+    console.log(bound, minLongitude, maxLongitude);
     return latFilteredPoints.slice(startIndex, endIndex + 1);
   }
+}
+function add(arg1, arg2) {
+  if (
+    arg1 === null ||
+    arg2 === null ||
+    arg1 === undefined ||
+    arg2 === undefined
+  ) {
+    return null;
+  }
+  let r1, r2;
+  try {
+    r1 = arg1.toString().split(".")[1].length;
+  } catch (e) {
+    r1 = 0;
+  }
+  try {
+    r2 = arg2.toString().split(".")[1].length;
+  } catch (e) {
+    r2 = 0;
+  }
+  const m = Math.pow(10, Math.max(r1, r2));
+  const n = r1 >= r2 ? r1 : r2;
+  return Number(((arg1 * m + arg2 * m) / m).toFixed(n));
 }
 function makeRange(arr) {
   const newArr = [];
   arr.reduce((s, v, i) => {
     newArr[i] = [];
     newArr[i].push(s);
-    s = s + v;
+    s = add(s, v);
     newArr[i].push(s);
     return s;
   }, 0);
@@ -123,10 +149,10 @@ function makeRange(arr) {
 const ZoomLevelRatio = [
   10 / 1000000,
   20 / 1000000,
-  30 / 1000000,
-  40 / 1000000,
   50 / 1000000,
   100 / 1000000,
+  150 / 1000000,
+  200 / 1000000,
   10000 / 1000000,
   20000 / 1000000,
   30000 / 1000000,
@@ -139,7 +165,7 @@ const ZoomLevelRatio = [
   100000 / 1000000,
   110000 / 1000000,
   120000 / 1000000,
-  219750 / 1000000,
+  219470 / 1000000,
 ];
 // 生成在边界bound中num数量的随机经纬度点
 function getRandomPoints(bound, num) {

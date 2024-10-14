@@ -70,7 +70,7 @@ class DrawMap {
       this.marketSet.add(point);
     }
     var marker = new BMapGL.Marker(
-      new BMapGL.Point(point.longitude, point.latitude),
+      new BMapGL.Point(point.longitude - 360, point.latitude),
       {
         title: point.time || "",
       }
@@ -79,7 +79,7 @@ class DrawMap {
       // 创建文本标注
       var label = new BMapGL.Label(text, {
         position: new BMapGL.Point(
-          turnOverLongitude ? 360 + point.longitude : point.longitude,
+          turnOverLongitude ? point.longitude - 360 : point.longitude,
           point.latitude
         ),
         offset: new BMapGL.Size(...offset),
