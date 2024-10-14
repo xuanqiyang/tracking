@@ -63,7 +63,7 @@
             map.drawPath(userTracking.getPath())
             console.log(userTracking.getStartStayPoints())
             userTracking.getStartStayPoints().forEach((p, i) => {
-                map.drawMarker(p, 'Index: ' + p.index + ' 停留' + Number(p.stayTime).toFixed(1) + '分钟')
+                map.drawMarker({ point: p, text: 'Index: ' + p.index + ' 停留' + Number(p.stayTime).toFixed(1) + '分钟' })
             })
         })
     )

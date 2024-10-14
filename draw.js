@@ -8,10 +8,10 @@ class DrawMap {
     var point = new BMapGL.Point(centalPoint.longitude, centalPoint.latitude);
     this.map.centerAndZoom(point, 19);
     this.map.enableScrollWheelZoom(true);
-    this.marketSet = new Set()
+    this.marketSet = new Set();
   }
 
-  drawLine (points, color) {
+  drawLine(points, color) {
     color = color ? color : "blue";
     var node = new BMapGL.Icon(
       "//mapopen-pub-jsapigl.bj.bcebos.com/demoimg/zhongheyiyuan.png",
@@ -38,46 +38,60 @@ class DrawMap {
     );
     this.map.addOverlay(polyline);
   }
-  drawPath (points) {
+  drawPath(points) {
     this.drawLine(points);
     points.forEach((p, i) => {
       if (p.reconnect) {
         this.drawLine([points[i - 1], p], "red");
-        this.drawMarker(
-          p,
-          `离线时间:${p.dh
-          }分钟;离线距离:${Math.round(p.ds)}米`,
-          'red',
-          [-20, -50]
-        );
+        this.drawMarker({
+          point: p,
+          text: `离线时间:${p.dh}分钟;离线距离:${Math.round(p.ds)}米`,
+          color: "red",
+          offset: [-20, -50],
+        });
       }
     });
   }
-  clear () {
-    this.map.clearOverlays()
-    this.marketSet.clear()
+  clear() {
+    this.map.clearOverlays();
+    this.marketSet.clear();
   }
-  drawMarker (p, text, color, offset = [-20, -30], cache = true) {
-    if (cache && this.marketSet.has(p)) {
-      return
+  drawMarker({
+    point,
+    text,
+    color,
+    offset = [-20, -30],
+    cache = true,
+    turnOverLongitude = false,
+  }) {
+    if (cache && this.marketSet.has(point)) {
+      return;
     } else {
-      this.marketSet.add(p)
+      this.marketSet.add(point);
     }
-    var marker = new BMapGL.Marker(new BMapGL.Point(p.longitude, p.latitude), {
-      title: p.time || '',
-    });
-    // 创建文本标注
-    var label = new BMapGL.Label(text, {
-      position: new BMapGL.Point(p.longitude, p.latitude),
-      offset: new BMapGL.Size(...offset),
-    });
-    label.setStyle({
-      // 设置label的样式
-      color: color || "#000",
-      fontSize: "10px",
-      border: "1px solid #1E90FF",
-    });
-    this.map.addOverlay(label);
+    var marker = new BMapGL.Marker(
+      new BMapGL.Point(point.longitude, point.latitude),
+      {
+        title: point.time || "",
+      }
+    );
+    if (text) {
+      // 创建文本标注
+      var label = new BMapGL.Label(text, {
+        position: new BMapGL.Point(
+          turnOverLongitude ? 360 + point.longitude : point.longitude,
+          point.latitude
+        ),
+        offset: new BMapGL.Size(...offset),
+      });
+      label.setStyle({
+        // 设置label的样式
+        color: color || "#000",
+        fontSize: "10px",
+        border: "1px solid #1E90FF",
+      });
+      this.map.addOverlay(label);
+    }
     this.map.addOverlay(marker);
   }
 }
