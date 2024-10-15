@@ -29,10 +29,11 @@ class PointsCutter {
     let cutPoints = [];
     // 筛选比zoom层级小的points
     const overZoomPoints = points.filter((v) => zoom <= v.zoomLevel);
-    // 最大比例尺,直接返回按边界截取的所有points
+    // 最大比例尺1:20米,直接返回按边界截取的所有overZoomPoints
     if (zoom === PointsCutter.MaxZoom) {
       cutPoints = filterByBound(overZoomPoints, bound);
     } else {
+      // 最小比例尺 1:1000公里,直接返回所有overZoomPoints
       cutPoints =
         zoom === PointsCutter.MinZoom
           ? overZoomPoints
@@ -40,22 +41,9 @@ class PointsCutter {
     }
     return cutPoints;
   }
-  // 从s个中均匀取出n个所需的步长
-  getInterval(s, n) {
-    if (n <= 0) {
-      return 0;
-    }
-    if (n >= s) {
-      return s;
-    }
-    if (n === 1) {
-      return Math.floor(s / 2);
-    }
-    return (s - 1) / (n - 1);
-  }
   iterByInterval(points, bound, zoom, method) {
     const cutPoints = this.getPoints(points, bound, zoom);
-    const interval = this.getInterval(
+    const interval = getInterval(
       cutPoints.length,
       PointsCutter.NumLimitInZoom[zoom]
     );
@@ -67,6 +55,19 @@ class PointsCutter {
   }
 }
 
+// 从s个中均匀取出n个所需的步长
+function getInterval(s, n) {
+  if (n <= 0) {
+    return 0;
+  }
+  if (n >= s) {
+    return s;
+  }
+  if (n === 1) {
+    return Math.floor(s / 2);
+  }
+  return (s - 1) / (n - 1);
+}
 /*
  * @description 根据经纬度范围过滤坐标点
  * @param {Array} points 坐标点数组
@@ -85,14 +86,16 @@ function filterByBound(points, bound) {
   const latFilteredPoints = sortedPoints
     .slice(startLatIndex, endLatIndex + 1)
     .sort((a, b) => a.longitude - b.longitude);
-  // 过国际日期变更线180|-180
+  // 边界露出国际日期变更线180|-180度 ,或者0度线, 或者经纬度跨度超过180度的情况,需要分段截取
   const turnOverLongitude = bound[1].longitude > bound[0].longitude;
   if (turnOverLongitude) {
+    // bound[1].longitude到东经180度(即180度)的,从西到东
     let startLngIndex = binarySearch(
       latFilteredPoints,
       bound[1].longitude,
       "longitude"
     );
+    // bound[0].longitude到西经180度(即-180度)的,从东到西
     let endLngIndex = binarySearch(
       latFilteredPoints,
       bound[0].longitude,
