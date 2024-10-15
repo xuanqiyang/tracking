@@ -1,4 +1,3 @@
-
 class PointsCutter {
   static MaxZoom = 21;
   static MinZoom = 3;
@@ -26,7 +25,7 @@ class PointsCutter {
   constructor() {
     this.cachePoints = new Set();
   }
-  getPoints (points, bound, zoom) {
+  getPoints(points, bound, zoom) {
     let cutPoints = [];
     // 筛选比zoom层级小的points
     const overZoomPoints = points.filter((v) => zoom <= v.zoomLevel);
@@ -34,20 +33,47 @@ class PointsCutter {
     if (zoom === PointsCutter.MaxZoom) {
       cutPoints = filterByBound(overZoomPoints, bound);
     } else {
-      cutPoints = (zoom === PointsCutter.MinZoom ? overZoomPoints : filterByBound(overZoomPoints, bound));
+      cutPoints =
+        zoom === PointsCutter.MinZoom
+          ? overZoomPoints
+          : filterByBound(overZoomPoints, bound);
     }
-    return getLimitPoints(cutPoints, PointsCutter.NumLimitInZoom[zoom]);
+    return cutPoints;
   }
-
+  // 从s个中均匀取出n个所需的步长
+  getInterval(s, n) {
+    if (n <= 0) {
+      return 0;
+    }
+    if (n >= s) {
+      return s;
+    }
+    if (n === 1) {
+      return Math.floor(s / 2);
+    }
+    return (s - 1) / (n - 1);
+  }
+  iterByInterval(points, bound, zoom, method) {
+    const cutPoints = this.getPoints(points, bound, zoom);
+    const interval = this.getInterval(
+      cutPoints.length,
+      PointsCutter.NumLimitInZoom[zoom]
+    );
+    for (let i = 0; i < PointsCutter.NumLimitInZoom[zoom]; i++) {
+      if (method) {
+        method(cutPoints[Math.floor(i * interval)]);
+      }
+    }
+  }
 }
 
 /*
-   * @description 根据经纬度范围过滤坐标点
-   * @param {Array} points 坐标点数组
-   * @param {Array} bound 经纬度范围[东北角, 西南角]
-   * @return {Array} 过滤后的坐标点数组
-*/
-function filterByBound (points, bound) {
+ * @description 根据经纬度范围过滤坐标点
+ * @param {Array} points 坐标点数组
+ * @param {Array} bound 经纬度范围[东北角, 西南角]
+ * @return {Array} 过滤后的坐标点数组
+ */
+function filterByBound(points, bound) {
   const sortedPoints = [...points].sort((a, b) => a.latitude - b.latitude);
   let startLatIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
   let endLatIndex = binarySearch(
@@ -60,18 +86,38 @@ function filterByBound (points, bound) {
     .slice(startLatIndex, endLatIndex + 1)
     .sort((a, b) => a.longitude - b.longitude);
   // 过国际日期变更线180|-180
-  const turnOverLongitude = bound[1].longitude > bound[0].longitude
+  const turnOverLongitude = bound[1].longitude > bound[0].longitude;
   if (turnOverLongitude) {
-    let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude")
-    let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true)
-    return latFilteredPoints.slice(startLngIndex).concat(latFilteredPoints.slice(0, endLngIndex + 1));
+    let startLngIndex = binarySearch(
+      latFilteredPoints,
+      bound[1].longitude,
+      "longitude"
+    );
+    let endLngIndex = binarySearch(
+      latFilteredPoints,
+      bound[0].longitude,
+      "longitude",
+      true
+    );
+    return latFilteredPoints
+      .slice(startLngIndex)
+      .concat(latFilteredPoints.slice(0, endLngIndex + 1));
   } else {
-    let startLngIndex = binarySearch(latFilteredPoints, bound[1].longitude, "longitude");
-    let endLngIndex = binarySearch(latFilteredPoints, bound[0].longitude, "longitude", true);
+    let startLngIndex = binarySearch(
+      latFilteredPoints,
+      bound[1].longitude,
+      "longitude"
+    );
+    let endLngIndex = binarySearch(
+      latFilteredPoints,
+      bound[0].longitude,
+      "longitude",
+      true
+    );
     return latFilteredPoints.slice(startLngIndex, endLngIndex + 1);
   }
 }
-function add (arg1, arg2) {
+function add(arg1, arg2) {
   if (
     arg1 === null ||
     arg2 === null ||
@@ -95,7 +141,7 @@ function add (arg1, arg2) {
   const n = r1 >= r2 ? r1 : r2;
   return Number(((arg1 * m + arg2 * m) / m).toFixed(n));
 }
-function makeRange (arr) {
+function makeRange(arr) {
   const newArr = [];
   arr.reduce((s, v, i) => {
     newArr[i] = [];
@@ -108,7 +154,7 @@ function makeRange (arr) {
 }
 
 // 生成在边界bound中num数量的随机经纬度点
-function getRandomPoints (bound, num) {
+function getRandomPoints(bound, num) {
   const ZoomLevelRatio = [
     10 / 1000000,
     20 / 1000000,
@@ -152,27 +198,7 @@ function getRandomPoints (bound, num) {
   }
   return points;
 }
-function getLimitPoints (points, n) {
-  if (n <= 0) {
-    return [];
-  }
-  if (n >= points.length) {
-    return points;
-  }
-  const s = points.length;
-  if (n === 1) {
-    return [points[Math.floor(s / 2)]];
-  }
-  const selectedPoints = [];
-  // 计算间隔
-  const interval = (s - 1) / (n - 1);
-  for (let i = 0; i < n; i++) {
-    const index = Math.floor(i * interval);
-    selectedPoints.push(points[index]);
-  }
-  return selectedPoints;
-}
-function binarySearch (arr, target, key, isRight) {
+function binarySearch(arr, target, key, isRight) {
   let left = 0;
   let right = arr.length - 1;
   let index = -1;
