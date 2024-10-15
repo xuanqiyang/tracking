@@ -1,17 +1,17 @@
 class DrawMap {
-  constructor(container, centalPoint) {
+  constructor(container, { center, zoom = 19 }) {
     // 创建地图实例
     this.map = new BMapGL.Map(container, {
       enableRotate: false,
       enableTilt: false,
     });
-    var point = new BMapGL.Point(centalPoint.longitude, centalPoint.latitude);
-    this.map.centerAndZoom(point, 19);
+    var point = new BMapGL.Point(center.longitude, center.latitude);
+    this.map.centerAndZoom(point, zoom);
     this.map.enableScrollWheelZoom(true);
     this.marketSet = new Set();
   }
 
-  drawLine (points, color) {
+  drawLine(points, color) {
     color = color ? color : "blue";
     var node = new BMapGL.Icon(
       "//mapopen-pub-jsapigl.bj.bcebos.com/demoimg/zhongheyiyuan.png",
@@ -38,7 +38,7 @@ class DrawMap {
     );
     this.map.addOverlay(polyline);
   }
-  drawPath (points) {
+  drawPath(points) {
     this.drawLine(points);
     points.forEach((p, i) => {
       if (p.reconnect) {
@@ -52,17 +52,11 @@ class DrawMap {
       }
     });
   }
-  clear () {
+  clear() {
     this.map.clearOverlays();
     this.marketSet.clear();
   }
-  drawMarker ({
-    point,
-    text,
-    color,
-    offset = [-20, -30],
-    cache = true,
-  }) {
+  drawMarker({ point, text, color, offset = [-20, -30], cache = true }) {
     if (cache && this.marketSet.has(point)) {
       return;
     } else {
@@ -77,10 +71,7 @@ class DrawMap {
     if (text) {
       // 创建文本标注
       var label = new BMapGL.Label(text, {
-        position: new BMapGL.Point(
-          point.longitude,
-          point.latitude
-        ),
+        position: new BMapGL.Point(point.longitude, point.latitude),
         offset: new BMapGL.Size(...offset),
       });
       label.setStyle({

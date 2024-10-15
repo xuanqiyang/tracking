@@ -59,7 +59,7 @@
             var userTracking = new Tracking()
             userTracking.initTracking(data)
             console.log(userTracking.getPath())
-            var map = new DrawMap('container', userTracking.getStartPoint())
+            var map = new DrawMap('container', { center: userTracking.getStartPoint() })
             map.drawPath(userTracking.getPath())
             console.log(userTracking.getStartStayPoints())
             userTracking.getStartStayPoints().forEach((p, i) => {

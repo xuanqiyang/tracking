@@ -39,11 +39,11 @@
         latitude: 17.440087
     }]
     var shopPoints = getRandomPoints(bound, 1000000)
-    const centrePoints = {
+    const centerPoint = {
         latitude: (bound[0].latitude + bound[1].latitude) / 2,
         longitude: (bound[1].longitude + bound[0].longitude) / 2
     }
-    var map = new DrawMap('container', centrePoints)
+    var map = new DrawMap('container', { center: centerPoint })
     var pointsCutter = new PointsCutter()
     map.map.addEventListener('dragend', function (e) {
         const zoomLevel = Math.floor(e.currentTarget.zoomLevel)
@@ -66,8 +66,7 @@
         //     map.drawMarker({ point: p, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
         // })
     }
-
-
+    // drawShops(bound, InitZoom)
 </script>
 
 </html>

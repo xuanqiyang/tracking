@@ -47,7 +47,11 @@ class PointsCutter {
       cutPoints.length,
       PointsCutter.NumLimitInZoom[zoom]
     );
-    for (let i = 0; i < PointsCutter.NumLimitInZoom[zoom]; i++) {
+    for (
+      let i = 0;
+      i < PointsCutter.NumLimitInZoom[zoom] && i * interval < cutPoints.length;
+      i++
+    ) {
       if (method) {
         method(cutPoints[Math.floor(i * interval)]);
       }
@@ -57,11 +61,11 @@ class PointsCutter {
 
 // 从s个中均匀取出n个所需的步长
 function getInterval(s, n) {
-  if (n <= 0) {
+  if (n <= 0 || s <= 0) {
     return 0;
   }
   if (n >= s) {
-    return s;
+    return 1;
   }
   if (n === 1) {
     return Math.floor(s / 2);
