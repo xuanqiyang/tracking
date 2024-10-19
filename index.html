@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Baidu Map </title>
+    <style type="text/css">
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+
+        #container {
+            height: 100%
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+</body>
+<script type="text/javascript"
+    src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=L1JWWC6Ae2ahrClyZjhz8WbzyxinmIJY"></script>
+<script>
+    function toRadians (degrees) {
+        return degrees * (Math.PI / 180);
+    }
+
+    function haversineDistance (p1, p2) {
+        const R = 6371000; // 地球平均半径，单位为米
+        const phi1 = toRadians(p1.latitude);
+        const phi2 = toRadians(p2.latitude);
+        const deltaPhi = toRadians(p2.latitude - p1.latitude);
+        const deltaLambda = toRadians(p2.longitude - p1.longitude);
+
+        const a =
+            Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+            Math.cos(phi1) *
+            Math.cos(phi2) *
+            Math.sin(deltaLambda / 2) *
+            Math.sin(deltaLambda / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        const distance = R * c;
+        return distance;
+    }
+</script>
+<script src="./cumTracking2.js"></script>
+<script src="./draw.js"></script>
+<script>
+    fetch("http://localhost/tracking_data.json", {}).then(res =>
+        res.json().then((data) => {
+            var userTracking = new Tracking()
+            userTracking.initTracking(data)
+            console.log(userTracking.getPath())
+            var map = new DrawMap('container', { center: userTracking.getStartPoint() })
+            map.drawPath(userTracking.getPath())
+            userTracking.getStartStayPoints().forEach((p, i) => {
+                map.drawMarker({ point: p, text: 'Index: ' + p.index + ' 停留' + Number(p.stayTime).toFixed(1) + '分钟' + (p.distance ? '起点-终点距离:' + p.distance : '') })
+            })
+        })
+    )
+</script>
+
+</html>

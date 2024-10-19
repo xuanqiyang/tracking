@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Baidu Map </title>
+    <style type="text/css">
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+
+        #container {
+            height: 100%
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+</body>
+<script type="text/javascript"
+    src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=L1JWWC6Ae2ahrClyZjhz8WbzyxinmIJY"></script>
+<script src="./cutPoints.js"></script>
+<script src="./draw.js"></script>
+<script>
+    // 东北角、西南角
+    var bound = [{
+        latitude: 53.658539,
+        longitude: 135.15975,
+    }, {
+        longitude: 73.418421,
+        latitude: 17.440087
+    }]
+    var shopPoints = getRandomPoints(bound, 1000000)
+    const centerPoint = {
+        latitude: (bound[0].latitude + bound[1].latitude) / 2,
+        longitude: (bound[1].longitude + bound[0].longitude) / 2
+    }
+    var map = new DrawMap('container', { center: centerPoint })
+    var pointsCutter = new PointsCutter()
+    map.map.addEventListener('dragend', function (e) {
+        const zoomLevel = Math.floor(e.currentTarget.zoomLevel)
+        const bounds = map.map.getBounds()
+        drawShops([{ latitude: bounds.ne.lat, longitude: bounds.ne.lng }, { latitude: bounds.sw.lat, longitude: bounds.sw.lng }], zoomLevel)
+    })
+    map.map.addEventListener('zoomend', function (e) {
+        const zoomLevel = Math.floor(e.currentTarget.zoomLevel)
+        const bounds = map.map.getBounds()
+        drawShops([{ latitude: bounds.ne.lat, longitude: bounds.ne.lng }, { latitude: bounds.sw.lat, longitude: bounds.sw.lng }], zoomLevel)
+    })
+    function drawShops (cutBound, zoom) {
+        console.log(cutBound, zoom)
+        map.clear()
+        pointsCutter.iterByInterval(shopPoints, cutBound, zoom, (point) => {
+            map.drawMarker({ point, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
+        })
+        // const cutPoints = pointsCutter.getPoints(shopPoints, cutBound, zoom)
+        // cutPoints.forEach((p, i) => {
+        //     map.drawMarker({ point: p, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
+        // })
+    }
+    // drawShops(bound, InitZoom)
+</script>
+
+</html>
