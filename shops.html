@@ -59,14 +59,9 @@
         console.log(cutBound, zoom)
         map.clear()
         pointsCutter.iterByInterval(shopPoints, cutBound, zoom, (point) => {
-            map.drawMarker({ point, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
+            map.drawMarker({ point })
         })
-        // const cutPoints = pointsCutter.getPoints(shopPoints, cutBound, zoom)
-        // cutPoints.forEach((p, i) => {
-        //     map.drawMarker({ point: p, turnOverLongitude: cutBound[0].longitude < cutBound[1].longitude })
-        // })
     }
-    // drawShops(bound, InitZoom)
 </script>
 
 </html>
