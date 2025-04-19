@@ -41,27 +41,24 @@ class PointsCutter {
     }
     return cutPoints;
   }
-  // 按照边界和
-  iterByInterval(points, bound, zoom, method) {
+  // 按照边界和缩放层级获取点, 并迭代执行方法
+  iterBySteps(points, bound, zoom, method) {
     const cutPoints = this.getPoints(points, bound, zoom);
-    const interval = getInterval(
-      cutPoints.length,
-      PointsCutter.NumLimitInZoom[zoom]
-    );
+    const steps = getSteps(cutPoints.length, PointsCutter.NumLimitInZoom[zoom]);
     for (
       let i = 0;
-      i < PointsCutter.NumLimitInZoom[zoom] && i * interval < cutPoints.length;
+      i < PointsCutter.NumLimitInZoom[zoom] && i * steps < cutPoints.length;
       i++
     ) {
       if (method) {
-        method(cutPoints[Math.floor(i * interval)]);
+        method(cutPoints[Math.floor(i * steps)]);
       }
     }
   }
 }
 
 // 从s个中均匀取出n个所需的步长
-function getInterval(s, n) {
+function getSteps(s, n) {
   if (n <= 0 || s <= 0) {
     return 0;
   }
@@ -81,6 +78,7 @@ function getInterval(s, n) {
  */
 function filterByBound(points, bound) {
   const sortedPoints = [...points].sort((a, b) => a.latitude - b.latitude);
+  // 先对points完成纬度上的切割
   let startLatIndex = binarySearch(sortedPoints, bound[1].latitude, "latitude");
   let endLatIndex = binarySearch(
     sortedPoints,
@@ -92,15 +90,16 @@ function filterByBound(points, bound) {
     .slice(startLatIndex, endLatIndex + 1)
     .sort((a, b) => a.longitude - b.longitude);
   // 边界露出国际日期变更线180|-180度 ,或者0度线, 或者经纬度跨度超过180度的情况,需要分段截取
+  // 这个时候地图左边界西南角的经度大于右边界东北角的经度
   const turnOverLongitude = bound[1].longitude > bound[0].longitude;
   if (turnOverLongitude) {
-    // bound[1].longitude到东经180度(即180度)的,从西到东
+    // bound[1].longitude到东经180度(即180度)的,从西到东,向左二分找到小于边界经度的最大点
     let startLngIndex = binarySearch(
       latFilteredPoints,
       bound[1].longitude,
       "longitude"
     );
-    // bound[0].longitude到西经180度(即-180度)的,从东到西
+    // bound[0].longitude到西经180度(即-180度)的,从东到西,向右二分找到大于边界经度的最小点
     let endLngIndex = binarySearch(
       latFilteredPoints,
       bound[0].longitude,

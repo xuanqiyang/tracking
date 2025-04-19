@@ -50,11 +50,30 @@
         const distance = R * c;
         return distance;
     }
+   function cutPointsByDistance (points, minDistance) {
+        if (!points || points.length === 0) return [];
+        const result = [points[0]]; // 保留第一个点
+        let lastPoint = points[0];
+        for (let i = 1; i < points.length; i++) {
+            const currentPoint = points[i];
+            const distance = calculateDistance(
+                lastPoint,
+                lastPoint,
+                currentPoint,
+                currentPoint
+            );
+            if (distance >= minDistance) {
+                result.push(currentPoint);
+                lastPoint = currentPoint; // 更新最后一个保留的点
+            }
+        }
+        return result;
+    } 
 </script>
 <script src="./cumTracking2.js"></script>
 <script src="./draw.js"></script>
 <script>
-    fetch("http://localhost/tracking_data.json", {}).then(res =>
+    fetch("http://192.168.12.203:86/tracking_data.json", {}).then(res =>
         res.json().then((data) => {
             var userTracking = new Tracking()
             userTracking.initTracking(data)

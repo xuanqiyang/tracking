@@ -8,6 +8,7 @@ class Tracking {
      * @params endStayPointIndex 上一次计算活动路线的结束点
      */
     this.points.reduce((endStayPointIndex, v, pointIndex) => {
+      // 计算重连点
       if (pointIndex > 0) {
         v.dh =
           (new Date(v.time) - new Date(this.points[pointIndex - 1].time)) /
@@ -28,17 +29,18 @@ class Tracking {
         haversineDistance(v, this.points[stayPointIndex]) <= 50;
         stayPointIndex++
       ) {
-        const h =
+        const dt =
           Math.abs(
             new Date(this.points[stayPointIndex].time) - new Date(v.time)
           ) /
           (60 * 1000);
         // 超过五分钟了
-        if (h > 5) {
+        if (dt > 5) {
           isStay = true;
         }
       }
       if (isStay) {
+        // aroundPoints: 本次活动范围内的点, 不包含stayPointIndex这个点
         const aroundPoints = this.points.slice(pointIndex, stayPointIndex);
         if (aroundPoints.length) {
           let sumLongitude = 0;

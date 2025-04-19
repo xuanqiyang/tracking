@@ -48,14 +48,14 @@ class DrawMap {
   }
   clear() {
     this.map.clearOverlays();
-    this.marketSet.clear();
+    // this.marketSet.clear();
   }
   drawMarker({ point, text, color, offset = [0, -20], cache = true }) {
-    if (cache && this.marketSet.has(point)) {
-      return;
-    } else {
-      this.marketSet.add(point);
-    }
+    // if (cache && this.marketSet.has(point)) {
+    //   return;
+    // } else {
+    //   this.marketSet.add(point);
+    // }
     var marker = new BMapGL.Marker(
       new BMapGL.Point(point.longitude, point.latitude),
       {

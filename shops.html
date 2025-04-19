@@ -53,12 +53,17 @@
     map.map.addEventListener('zoomend', function (e) {
         const zoomLevel = Math.floor(e.currentTarget.zoomLevel)
         const bounds = map.map.getBounds()
+        // if (zoomLevel < currentZoomLevel) {
+        //     map.clear()
+        //     pointsCutter.clearCache()
+        // }
+        currentZoomLevel = zoomLevel
         drawShops([{ latitude: bounds.ne.lat, longitude: bounds.ne.lng }, { latitude: bounds.sw.lat, longitude: bounds.sw.lng }], zoomLevel)
     })
     function drawShops (cutBound, zoom) {
         console.log(cutBound, zoom)
         map.clear()
-        pointsCutter.iterByInterval(shopPoints, cutBound, zoom, (point) => {
+        pointsCutter.iterBySteps(shopPoints, cutBound, zoom, (point) => {
             map.drawMarker({ point })
         })
     }
